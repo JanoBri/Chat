@@ -1,0 +1,42 @@
+services:
+  traefik:
+    image: traefik:v2.10
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"        # HTTP Port für Traefik
+      - "8080:8080"    # Port für das Traefik-Dashboard
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - traefik-net
+
+  flask-backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flask-backend.rule=PathPrefix(`/chat`)"
+      - "traefik.http.services.flask-backend.loadbalancer.server.port=5000"
+    networks:
+      - traefik-net
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+    networks:
+      - traefik-net
+
+networks:
+  traefik-net:
+    driver: bridge
