@@ -13,15 +13,15 @@ services:
     networks:
       - traefik-net
 
-  flask-backend:
+  backend:
     build:
       context: ./Backend
       dockerfile: Dockerfile
     container_name: backend
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.flask-backend.rule=PathPrefix(`/chat`)"
-      - "traefik.http.services.flask-backend.loadbalancer.server.port=5000"
+      - "traefik.http.routers.backend.rule=PathPrefix(`/chat`)"
+      - "traefik.http.services.backend.loadbalancer.server.port=5000"
     networks:
       - traefik-net
 
